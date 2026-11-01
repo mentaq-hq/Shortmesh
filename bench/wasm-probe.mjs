@@ -1,0 +1,20 @@
+import { readFile } from 'node:fs/promises';
+const bytes = await readFile(new URL('../static/engine.wasm', import.meta.url));
+const { instance } = await WebAssembly.instantiate(bytes, {});
+const x = instance.exports;
+console.log('exports:', Object.keys(x).join(', '));
+console.log('abi:', x.toon_abi_version(), 'memory bytes:', x.memory.buffer.byteLength);
+
+const vertices = new Float32Array([-1, -1, 0, 1, -1, 0, 1, 1, 0, -1, 1, 0]);
+const triangles = new Uint32Array([0, 1, 2, 0, 2, 3]);
+const vp = x.toon_alloc(vertices.byteLength);
+new Float32Array(x.memory.buffer, vp, 12).set(vertices);
+const tp = x.toon_alloc(triangles.byteLength);
+new Uint32Array(x.memory.buffer, tp, 6).set(triangles);
+const handle = x.toon_mesh_new(vp, 4, tp, 2);
+console.log('handle:', handle, 'triangles:', x.toon_mesh_triangles(handle));
+console.log('ray t (expect 3):', x.toon_mesh_raycast(handle, 0, 0, 3, 0, 0, -1, 10));
+console.log('miss (expect -1):', x.toon_mesh_raycast(handle, 5, 5, 3, 0, 0, -1, 10));
+const out = x.toon_alloc(8 * 4);
+console.log('in sphere (expect 4):', x.toon_mesh_vertices_in_sphere(handle, 0, 0, 0, 1.5, out, 8));
+console.log('free:', x.toon_mesh_free(handle));

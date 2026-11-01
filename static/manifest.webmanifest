@@ -1,0 +1,35 @@
+{
+  "name": "Toon Studio",
+  "short_name": "ToonStudio",
+  "description": "Professional 3D modeling, animation, and rendering studio",
+  "start_url": "/",
+  "display": "fullscreen",
+  "background_color": "#0b0c10",
+  "theme_color": "#0b0c10",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["graphics", "design", "productivity"],
+  "screenshots": [],
+  "shortcuts": [
+    {
+      "name": "New Project",
+      "short_name": "New",
+      "description": "Create a new 3D project",
+      "url": "/?new=true",
+      "icons": [{ "src": "/icon-new.png", "sizes": "192x192" }]
+    }
+  ]
+}

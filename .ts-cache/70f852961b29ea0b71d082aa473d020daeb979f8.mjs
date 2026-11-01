@@ -1,0 +1,9 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { cubeMesh } from '../src/lib/mesh.ts';
+test('cube has faces', () => {
+  const mesh = cubeMesh();
+  assert.ok(mesh.vertices.length >= 8);
+  assert.ok(mesh.faces.length >= 6);
+});
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJuYW1lcyI6W10sInNvdXJjZXMiOlsicHJvYmUudGVzdC50cyJdLCJzb3VyY2VzQ29udGVudCI6WyJpbXBvcnQgeyB0ZXN0IH0gZnJvbSAnbm9kZTp0ZXN0JztcbmltcG9ydCBhc3NlcnQgZnJvbSAnbm9kZTphc3NlcnQvc3RyaWN0JztcbmltcG9ydCB7IGN1YmVNZXNoIH0gZnJvbSAnLi4vc3JjL2xpYi9tZXNoLnRzJztcblxudGVzdCgnY3ViZSBoYXMgZmFjZXMnLCAoKSA9PiB7XG5cdGNvbnN0IG1lc2ggPSBjdWJlTWVzaCgpO1xuXHRhc3NlcnQub2sobWVzaC52ZXJ0aWNlcy5sZW5ndGggPj0gOCk7XG5cdGFzc2VydC5vayhtZXNoLmZhY2VzLmxlbmd0aCA+PSA2KTtcbn0pO1xuIl0sIm1hcHBpbmdzIjoiQUFBQSxTQUFTLElBQUksUUFBUSxXQUFXO0FBQ2hDLE9BQU8sTUFBTSxNQUFNLG9CQUFvQjtBQUN2QyxTQUFTLFFBQVEsUUFBUSxvQkFBb0I7QUFFN0MsSUFBSSxDQUFDLGdCQUFnQixFQUFFLE1BQU07RUFDNUIsTUFBTSxJQUFJLEdBQUcsUUFBUSxDQUFDLENBQUM7RUFDdkIsTUFBTSxDQUFDLEVBQUUsQ0FBQyxJQUFJLENBQUMsUUFBUSxDQUFDLE1BQU0sSUFBSSxDQUFDLENBQUM7RUFDcEMsTUFBTSxDQUFDLEVBQUUsQ0FBQyxJQUFJLENBQUMsS0FBSyxDQUFDLE1BQU0sSUFBSSxDQUFDLENBQUM7QUFDbEMsQ0FBQyxDQUFDIiwiaWdub3JlTGlzdCI6W119
