@@ -272,6 +272,26 @@ function meshAdjacency(mesh: Mesh): Map<number, number[]> {
 	return adj;
 }
 
+const objectIndexCache = new WeakMap();
+function objectIndex(objects) {
+	let idx = objectIndexCache.get(objects);
+	if (idx && idx.size === objects.length) return idx;
+	idx = new Map();
+	for (const o of objects) idx.set(o.id, o);
+	objectIndexCache.set(objects, idx);
+	return idx;
+}
+const EPS = 1e-6;
+function vecChanged(a, b) {
+	return Math.abs(a[0]-b[0]) > EPS || Math.abs(a[1]-b[1]) > EPS || Math.abs(a[2]-b[2]) > EPS;
+}
+function assignVec3(a, b) {
+	if (!vecChanged(a, b)) return false;
+	a[0]=b[0]; a[1]=b[1]; a[2]=b[2];
+	return true;
+}
+function assignEuler(t, n) { return assignVec3(t, n); }
+
 type TRS = {
 	position: [number, number, number];
 	rotation: [number, number, number];
@@ -2451,53 +2471,61 @@ function createSceneStore() {
 
 		updateCameraTracking: (dt = 0.016, currentTime = 0) => {
 			const snap = get(sceneStore);
-			const hasTrackingCam = snap.objects.some(
-				(o) =>
-					(o.type === 'camera' || o.type.startsWith('camera_')) &&
-					o.cameraProps &&
-					o.cameraProps.trackingMode !== 'none' &&
-					Boolean(o.cameraProps.targetId),
-			);
+			const hasTrackingCam = snap.objects.some((o) => (o.type === 'camera' || o.type.startsWith('camera_')) && o.cameraProps && o.cameraProps.trackingMode !== 'none' && Boolean(o.cameraProps.targetId));
 			if (!hasTrackingCam) return;
+			const index = objectIndex(snap.objects);
+			let moves = false;
+			for (const object of snap.objects) {
+				if ((object.type !== 'camera' && !object.type.startsWith('camera_')) || !object.cameraProps || object.cameraProps.trackingMode === 'none') continue;
+				const targetId = object.cameraProps.targetId;
+				if (!targetId) continue;
+				const target = index.get(targetId);
+				if (!target) continue;
+				const offset = object.cameraProps.targetOffset ?? [0, 0.5, 0];
+				const targetCenter = [target.position[0]+offset[0], target.position[1]+offset[1], target.position[2]+offset[2]];
+				const mode = object.cameraProps.trackingMode;
+				if (mode === 'look_at') { if (vecChanged(object.rotation, lookAtEuler(object.position, targetCenter))) { moves = true; break; } }
+				else if (mode === 'follow') {
+					const dist = object.cameraProps.followDistance ?? 4.5;
+					const h = object.cameraProps.followHeight ?? 1.8;
+					const behind = rotateEuler([0, 0, dist], target.rotation);
+					const damp = clamp(object.cameraProps.damping ?? 0.15, 0.01, 1);
+					const next = [object.position[0] + (targetCenter[0]+behind[0]-object.position[0])*damp, object.position[1] + (targetCenter[1]+h-object.position[1])*damp, object.position[2] + (targetCenter[2]+behind[2]-object.position[2])*damp];
+					if (vecChanged(object.position, next)) { moves = true; break; }
+				} else if (mode === 'orbit') {
+					const dist = object.cameraProps.followDistance ?? 4.5;
+					const h = object.cameraProps.followHeight ?? 1.8;
+					const theta = currentTime * 0.75;
+					const next = [targetCenter[0]+Math.sin(theta)*dist, targetCenter[1]+h, targetCenter[2]+Math.cos(theta)*dist];
+					if (vecChanged(object.position, next)) { moves = true; break; }
+				}
+			}
+			if (!moves) return;
 			update((state) => {
+				const stateIndex = objectIndex(state.objects);
 				for (const object of state.objects) {
 					if ((object.type !== 'camera' && !object.type.startsWith('camera_')) || !object.cameraProps || object.cameraProps.trackingMode === 'none') continue;
 					const targetId = object.cameraProps.targetId;
 					if (!targetId) continue;
-					const target = state.objects.find((o) => o.id === targetId);
+					const target = stateIndex.get(targetId);
 					if (!target) continue;
-
 					const offset = object.cameraProps.targetOffset ?? [0, 0.5, 0];
-					const targetCenter: Vec3 = [
-						target.position[0] + offset[0],
-						target.position[1] + offset[1],
-						target.position[2] + offset[2],
-					];
-
+					const targetCenter = [target.position[0]+offset[0], target.position[1]+offset[1], target.position[2]+offset[2]];
 					if (object.cameraProps.trackingMode === 'look_at') {
-						object.rotation = lookAtEuler(object.position, targetCenter);
+						assignEuler(object.rotation, lookAtEuler(object.position, targetCenter));
 					} else if (object.cameraProps.trackingMode === 'follow') {
 						const dist = object.cameraProps.followDistance ?? 4.5;
 						const h = object.cameraProps.followHeight ?? 1.8;
 						const behind = rotateEuler([0, 0, dist], target.rotation);
-						const desiredPos: Vec3 = [
-							targetCenter[0] + behind[0],
-							targetCenter[1] + h,
-							targetCenter[2] + behind[2],
-						];
 						const damp = clamp(object.cameraProps.damping ?? 0.15, 0.01, 1);
-						object.position[0] += (desiredPos[0] - object.position[0]) * damp;
-						object.position[1] += (desiredPos[1] - object.position[1]) * damp;
-						object.position[2] += (desiredPos[2] - object.position[2]) * damp;
-						object.rotation = lookAtEuler(object.position, targetCenter);
+						assignVec3(object.position, [object.position[0]+(targetCenter[0]+behind[0]-object.position[0])*damp, object.position[1]+(targetCenter[1]+h-object.position[1])*damp, object.position[2]+(targetCenter[2]+behind[2]-object.position[2])*damp]);
+						assignEuler(object.rotation, lookAtEuler(object.position, targetCenter));
 					} else if (object.cameraProps.trackingMode === 'orbit') {
 						const dist = object.cameraProps.followDistance ?? 4.5;
 						const h = object.cameraProps.followHeight ?? 1.8;
 						const theta = currentTime * 0.75;
-						object.position[0] = targetCenter[0] + Math.sin(theta) * dist;
-						object.position[1] = targetCenter[1] + h;
-						object.position[2] = targetCenter[2] + Math.cos(theta) * dist;
-						object.rotation = lookAtEuler(object.position, targetCenter);
+						assignVec3(object.position, [targetCenter[0]+Math.sin(theta)*dist, targetCenter[1]+h, targetCenter[2]+Math.cos(theta)*dist]);
+						assignEuler(object.rotation, lookAtEuler(object.position, targetCenter));
 					}
 				}
 				return state;
