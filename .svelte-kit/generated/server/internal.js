@@ -26,7 +26,7 @@ export const options = {
 		app: ({ head, body, assets, nonce, env }) => "<!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\" />\n    <meta name=\"viewport\" content=\"width=device-width, initial-scale=1, viewport-fit=cover\" />\n    <title>Toon Studio</title>\n    <link rel=\"preconnect\" href=\"https://fonts.googleapis.com\" />\n    <link rel=\"preconnect\" href=\"https://fonts.gstatic.com\" crossorigin />\n    <link href=\"https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800&display=swap\" rel=\"stylesheet\" />\n    <link rel=\"icon\" type=\"image/png\" href=\"/icon-192.png\" />\n    <link rel=\"manifest\" href=\"/manifest.webmanifest\" />\n    <meta name=\"theme-color\" content=\"#0b0c10\" />\n    " + head + "\n  </head>\n  <body>\n    <div id=\"app\">" + body + "</div>\n  </body>\n</html>",
 		error
 	},
-	version_hash: "od7yty"
+	version_hash: "1jo7i2n"
 };
 
 export async function get_hooks() {

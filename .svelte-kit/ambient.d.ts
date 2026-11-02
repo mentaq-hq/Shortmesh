@@ -59,7 +59,6 @@ declare module '$env/static/private' {
 	export const npm_package_json: string;
 	export const KILO_API_URL: string;
 	export const CLOUDFLARE_LOCATION: string;
-	export const KILO_BACKGROUND_PROCESS_ID: string;
 	export const SSL_CERT_FILE: string;
 	export const npm_config_userconfig: string;
 	export const npm_config_local_prefix: string;
@@ -74,7 +73,6 @@ declare module '$env/static/private' {
 	export const npm_config_prefix: string;
 	export const npm_config_npm_version: string;
 	export const OPENCODE_CONFIG_CONTENT: string;
-	export const TERM: string;
 	export const npm_config_cache: string;
 	export const OPENCODE: string;
 	export const GIT_CONFIG_VALUE_0: string;
@@ -230,7 +228,6 @@ declare module '$env/dynamic/private' {
 		npm_package_json: string;
 		KILO_API_URL: string;
 		CLOUDFLARE_LOCATION: string;
-		KILO_BACKGROUND_PROCESS_ID: string;
 		SSL_CERT_FILE: string;
 		npm_config_userconfig: string;
 		npm_config_local_prefix: string;
@@ -245,7 +242,6 @@ declare module '$env/dynamic/private' {
 		npm_config_prefix: string;
 		npm_config_npm_version: string;
 		OPENCODE_CONFIG_CONTENT: string;
-		TERM: string;
 		npm_config_cache: string;
 		OPENCODE: string;
 		GIT_CONFIG_VALUE_0: string;
